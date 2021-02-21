@@ -20,19 +20,21 @@ import com.example.pip.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     lateinit var Binding: ActivityMainBinding
-    val URL:String="www.google.com"
+    val URL:String="https://www.google.com"
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         Binding= ActivityMainBinding.inflate(layoutInflater)
         val view = Binding.root
-        setContentView(view)
 
         Binding.web.webViewClient = WebViewClient()
         Binding.web.settings.javaScriptEnabled=true
-        Binding.editText.setText(URL)
         Binding.web.loadUrl("https://www.google.com")
+
+        setContentView(view)
+
+
 //        by default google will open
 
         Binding.search.setOnClickListener {
@@ -44,9 +46,6 @@ class MainActivity : AppCompatActivity() {
         Binding.floatingBtn.setOnClickListener {
             PIP()
         }
-
-
-
 
     }
 
