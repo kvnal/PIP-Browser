@@ -2,20 +2,20 @@ package com.example.pip
 
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Point
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.renderscript.ScriptGroup
-import android.text.Editable
 import android.util.Rational
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.view.get
 import com.example.pip.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -27,26 +27,42 @@ class MainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         Binding= ActivityMainBinding.inflate(layoutInflater)
         val view = Binding.root
-
+        setContentView(view)
         Binding.web.webViewClient = WebViewClient()
         Binding.web.settings.javaScriptEnabled=true
         Binding.web.loadUrl("https://www.google.com")
-
-        setContentView(view)
 
 
 //        by default google will open
 
         Binding.search.setOnClickListener {
-            var Search =Binding.editText.text
-            WebV(Search.toString())
+            webSearch()
+        }
 
+        Binding.editText.setOnEditorActionListener {v, actionId, event ->
+            if (actionId==EditorInfo.IME_ACTION_SEARCH) webSearch();true
         }
 
         Binding.floatingBtn.setOnClickListener {
             PIP()
         }
 
+    }
+
+    private fun webSearch() {
+        var Search =Binding.editText.getText().toString()
+        if (!Search.startsWith("https://") && !Search.startsWith("www.")) {
+            val query: String = Search.split(" ").joinToString("+")
+            Search = "https://www.google.com/search?q=$query"
+        }
+        if(Search.startsWith("www.")) Search="https://$Search"
+        if (currentFocus!=null)
+        {
+            val inp=getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inp.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
+            Binding.editText.clearFocus()
+        }
+        WebV(Search.toString())
     }
 
     override fun onBackPressed() {
@@ -57,10 +73,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private fun WebV(Search:String) {
-        Binding.editText.setText(Binding.web.getUrl().toString())
+    private fun WebV(Search: String) {
         Binding.web.loadUrl(Search)
     }
+
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun PIP() {
@@ -68,14 +85,14 @@ class MainActivity : AppCompatActivity() {
             val dimension = windowManager.defaultDisplay
             val points= Point()
             dimension.getSize(points)
-            Pip.setAspectRatio(Rational(points.x,points.y))
+            Pip.setAspectRatio(Rational(points.x, points.y))
             enterPictureInPictureMode(Pip.build())
         }
 
         @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
         override fun onPictureInPictureModeChanged(
-            isInPictureInPictureMode: Boolean,
-            newConfig: Configuration?
+                isInPictureInPictureMode: Boolean,
+                newConfig: Configuration?
         ) {
             if(isInPictureInPictureMode)
             {
@@ -93,6 +110,7 @@ class MainActivity : AppCompatActivity() {
 //            newConfig?.orientation=Configuration.ORIENTATION_PORTRAIT
             }
         }}
+
 
 
 
